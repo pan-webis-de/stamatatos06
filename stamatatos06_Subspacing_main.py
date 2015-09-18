@@ -133,6 +133,7 @@ def predict_class( n_max_feature_number, m_subspace_width, trainingset, test_tex
     predict_result = mp(n_max_feature_number, m_subspace_width, classifier_set, test_text)
     return trainingset.target_names[argmax(predict_result)] 
 
+####################Settings##################
 n = 100
 m = 2
 encoding_setting = 'ISO 8859-2'
