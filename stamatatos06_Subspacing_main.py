@@ -182,7 +182,7 @@ categories = None
 #                text1.txt text2.txt ....
 #    for mac osX :
 #     the folder must without .DS_store
-#     for this use
+#     for mac use this command in terminal 
 #        find . -name '*.DS_Store' -type f -delete
 
 #trainSet = load_files('HitchHikersQuotes'  , categories= categories)
