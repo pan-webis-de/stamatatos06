@@ -11,6 +11,7 @@ from enable.savage.svg.css.transform import transform
 from sympy.mpmath import root
 from StdSuites.AppleScript_Suite import result
 from numpy import ndarray
+
 '''
 this script implements the methods of E. Stamatatos' paper 'AUTORSHIP ATTRIBUTION ON FEATURE SET SUBSPACING ENSEMBLES'
 
@@ -48,7 +49,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
 
     tfid_transformer= TfidfTransformer( use_idf=False)
     k =0
-    while k < int(n_max_feature_number/m_subspace_width):
+    while k < int(2*n_max_feature_number/m_subspace_width):
         k = k+1
         #get new vectorizer trained on the features in the special subspace
         singel_count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding)
@@ -155,9 +156,6 @@ def getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testS
 
     return (mean * (1./k))
 
-
-
-
 def getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data):
     '''
     getting the mean of the posterior probailities see formula 3 in the paper
@@ -202,7 +200,7 @@ def perdict_with_trainset( n_max_feature_number, m_subspace_width, classifier_se
     print predict_result
     return trainingset.target_names[argmax(predict_result)]
 ####################Settings##################
-n = 800
+n = 1000
 m = 2
 encoding_setting = 'ISO 8859-7'#'utf-8'
 
@@ -226,18 +224,13 @@ categories = None
 
 trainSet = load_files('Vima-Authors/vima GB/training corpus' )
 testSet = load_files('Vima-Authors/vima GB/test corpus', categories=None )
-classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n , m, encoding_setting)
+classifier_set = k_randome_classifier(trainSet,  n , m, encoding_setting)
 
 
 
 print '#########'
 
-'''    
-tfid_transformer =TfidfTransformer( use_idf=False)
-X_train_tfidf =tfid_transformer.fit_transform(test_vector)
-product =  classifier_set.classifier[1].predict_proba(X_train_tfidf)
-print product
-'''
+
 product = mp(n, m, classifier_set, testSet.data)
 
 print ' normal',product
@@ -259,7 +252,7 @@ print ' percentage' , percent
 
 print 'erg' ,ergebnis
 print 'target ' , testSet.target
-print 'author 3 ', testSet.target_names[3]
+#print 'author 3 ', testSet.target_names[3]
 ### percentage #### 
 
 '''
