@@ -2,14 +2,12 @@
 from sklearn.datasets import load_files
 from sklearn.feature_extraction.text import CountVectorizer
 from numpy.random import randint
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.lda import LDA
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.datasets import fetch_20newsgroups
 from numpy import power, float64
 from numpy import argmax
-from enable.savage.svg.css.transform import transform
 from sympy.mpmath import root
-from StdSuites.AppleScript_Suite import result
 from numpy import ndarray
 
 '''
@@ -73,7 +71,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
         #normize it
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
         #train the Classifier with the normed vector set
-        clf = LinearDiscriminantAnalysis(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
         vectorizerList.append(singel_count_vectorizer)
@@ -129,7 +127,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LinearDiscriminantAnalysis(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
