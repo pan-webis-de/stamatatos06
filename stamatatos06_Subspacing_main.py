@@ -2,14 +2,11 @@
 from sklearn.datasets import load_files
 from sklearn.feature_extraction.text import CountVectorizer
 from numpy.random import randint
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.lda import LDA
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.datasets import fetch_20newsgroups
 from numpy import power, float64
 from numpy import argmax
-from enable.savage.svg.css.transform import transform
-from sympy.mpmath import root
-from StdSuites.AppleScript_Suite import result
 from numpy import ndarray
 
 '''
@@ -37,7 +34,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
     '''
     ### make subspaces
 
-    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding)
+    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding,token_pattern= '(?u)\\b\\w+\\b' )
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
     #when less features in the Feature list then max_feature raise Valueerror
@@ -73,7 +70,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
         #normize it
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
         #train the Classifier with the normed vector set
-        clf = LinearDiscriminantAnalysis(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
         vectorizerList.append(singel_count_vectorizer)
@@ -84,7 +81,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
     ''' Select m randomly chosen features from the data set and erase them from it. so you use ever feature only once
     '''
     ########## create feature list
-    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding)
+    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding ,token_pattern= '(?u)\\b\\w+\\b')
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
     #when less features in the Feature list then max_feature raise Valueerror
@@ -129,7 +126,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LinearDiscriminantAnalysis(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='svd' ).fit( X_train_tfidf.toarray(), trainSet.target)
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -222,9 +219,12 @@ categories = None
 #     for mac use this command in terminal 
 #        find . -name '*.DS_Store' -type f -delete
 
-trainSet = load_files('Vima-Authors/vima GB/training corpus' )
-testSet = load_files('Vima-Authors/vima GB/test corpus', categories=None )
-classifier_set = k_randome_classifier(trainSet,  n , m, encoding_setting)
+#trainSet = load_files('Vima-Authors/vima GB/training corpus' )
+#testSet = load_files('Vima-Authors/vima GB/test corpus', categories=None )
+trainSet = load_files('NEW CORPORA/C10', categories= ['candidate00001', 'candidate00002', 'candidate00003', 'candidate00004', 'candidate00005', 'candidate00006', 'candidate00007', 'candidate00008', 'candidate00009', 'candidate00010']  )
+testSet = load_files('NEW CORPORA/C10', categories=['unknown'] )
+
+classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n , m, encoding_setting)
 
 
 
