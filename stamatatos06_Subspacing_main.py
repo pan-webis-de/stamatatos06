@@ -126,7 +126,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LDA(solver='svd' ).fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='lsqr', shrinkage='auto' ).fit( X_train_tfidf.toarray(), trainSet.target)
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -148,7 +148,7 @@ def getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testS
     while i < k:
         test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
         mean = mean + classifier_bunch.classifier[i].predict_proba(test_vector)
-        print i , mean
+        print i
         i += 1
 
     return (mean * (1./k))
@@ -170,7 +170,7 @@ def getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, te
     while i < k:
         test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
         product = product * classifier_bunch.classifier[i].predict_proba(test_vector)*10
-        #print i , product
+        print i 
         i += 1
 
     #productList.append( power(product, (1/k)));
@@ -223,7 +223,7 @@ categories = None
 #testSet = load_files('Vima-Authors/vima GB/test corpus', categories=None )
 trainSet = load_files('NEW CORPORA/C10', categories= ['candidate00001', 'candidate00002', 'candidate00003', 'candidate00004', 'candidate00005', 'candidate00006', 'candidate00007', 'candidate00008', 'candidate00009', 'candidate00010']  )
 testSet = load_files('NEW CORPORA/C10', categories=['unknown'] )
-
+# train Classifier
 classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n , m, encoding_setting)
 
 
