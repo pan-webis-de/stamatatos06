@@ -145,12 +145,10 @@ def getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testS
     test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
         
     mean =  classifier_bunch.classifier[i].predict_proba(test_vector)
-    #print i , mean
     i +=1
     while i < k:
         test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
         mean = mean + classifier_bunch.classifier[i].predict_proba(test_vector)
-        #print i, mean
         i += 1
 
     return (mean * (1./k))
@@ -198,17 +196,16 @@ def getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, te
             
         
         product *= power(productHelp, (1./k))     
-        print ' i = ', i , product     
+        #print ' i = ', i , product     
     return product
 def mp(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data):
     #avaerage from the product and sum
     '''Average of Mean and Prduct  '''
     mean = getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data)
-    print 'mean', mean
+    
 
     product= getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data)
-    print  'product',product
-    #print ((mean + product)/2)
+    
     return ((mean + product)/2)
 def predict_class( n_max_feature_number, m_subspace_width, trainingset, test_text, text_encoding,  mode = exhaustiv_disjoint_subspacing ):
     # use k_randome_classifier or exhaustiv_disjoint_subspacing for mode  exhaustiv_disjoint_subspacing
@@ -220,7 +217,6 @@ def perdict_with_trainset( n_max_feature_number, m_subspace_width, classifier_se
     #use k_randome_classifier or exhaustiv_disjoint_subspacing for mode  exhaustiv_disjoint_subspacing
     #works only for one text at the time
     predict_result = mp(n_max_feature_number, m_subspace_width, classifier_set, test_text)
-    print predict_result
     return trainingset.target_names[argmax(predict_result)]
 def getBunchOutRawTrain(texts, text_authors, authorNames):
     return Bunch( data= texts, target= text_authors, target_names= authorNames, DESCR=None)
@@ -261,28 +257,14 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ):
     for t_text in tests: 
         #run classifier for every test text 
         test_texts.append(jsonhandler.getUnknownText(t_text))
-        
-         # list with most probabil authors 
-        
-        #ergebnisList.append(ergebnis[0])
-         
+              
     proMatrx= mp(n_max_feature_number, m_subspace_width, classifier_set, test_texts)
-    
     ergebnis = argmax(proMatrx, 1 ) 
-      
-
-    
-    
-    
-    
-    #print 'ergebnis ', ergebnis
-    
     result_author_list= []
     for i in range(len(ergebnis)):
         result_author_list.append(authors[ergebnis[i]])
         prob_list.append(proMatrx[i][ergebnis[i]])
-    #print result_author_list
-    #print ' probList',prob_list 
+   
     
     jsonhandler.storeJson(outputdir,tests, result_author_list, prob_list)
 
@@ -301,9 +283,7 @@ elif (len(sys.argv)==5):
     inputdir= sys.argv[1]
     outputdir= sys.argv[2]
     n= int(sys.argv[3])
-    print n
     m= int(sys.argv[4])
-    print m
     main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m)
 else:
     logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
