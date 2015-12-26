@@ -4,10 +4,12 @@ from sklearn.feature_extraction.text import CountVectorizer
 from numpy.random import randint
 from sklearn.lda import LDA
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.datasets import fetch_20newsgroups
 from numpy import power, float64
 from numpy import argmax
 from numpy import ndarray
+import jsonhandler
+import sys
+import logging
 
 '''
 this script implements the methods of E. Stamatatos' paper 'AUTORSHIP ATTRIBUTION ON FEATURE SET SUBSPACING ENSEMBLES'
@@ -34,7 +36,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
     '''
     ### make subspaces
 
-    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding,token_pattern= '(?u)\\b\\w+\\b' )
+    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding )
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
     #when less features in the Feature list then max_feature raise Valueerror
@@ -81,7 +83,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
     ''' Select m randomly chosen features from the data set and erase them from it. so you use ever feature only once
     '''
     ########## create feature list
-    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding ,token_pattern= '(?u)\\b\\w+\\b')
+    count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding )#,token_pattern= '(?u)\\b\\w+\\b'
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
     #when less features in the Feature list then max_feature raise Valueerror
@@ -126,7 +128,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LDA(solver='lsqr', shrinkage='auto' ).fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target )
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -148,7 +150,7 @@ def getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testS
     while i < k:
         test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
         mean = mean + classifier_bunch.classifier[i].predict_proba(test_vector)
-        print i
+        #print i, mean
         i += 1
 
     return (mean * (1./k))
@@ -162,28 +164,52 @@ def getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, te
     #while t in range(len(testSet_data)):
        
     i=0
-    test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
-        
-    product =  classifier_bunch.classifier[i].predict_proba(test_vector)*10
-    #print i , product
-    i +=1
+    j=0
+    test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)    
+    productHelp =  classifier_bunch.classifier[i].predict_proba(test_vector)
+    j += 1
+    i += 1 
+   
+    
+    product =  power(productHelp, (1./k))
+    
+    
     while i < k:
-        test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
-        product = product * classifier_bunch.classifier[i].predict_proba(test_vector)*10
-        print i 
-        i += 1
-
-    #productList.append( power(product, (1/k)));
-    
-    
-    return (power(product, 1./k) * power(1./10 , 1./k))
+        j= 0
+        
+        
+        while j< 100:
+            if (j == 0):
+                test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)    
+                productHelp =  classifier_bunch.classifier[i].predict_proba(test_vector)
+                #print 'product help', productHelp
+                j += 1
+                i += 1 
+                continue 
+                #'''work here '''
+                
+            if (i<k):
+                test_vector = classifier_bunch.vectorizer[i].transform(testSet_data)
+                productHelp *=   (classifier_bunch.classifier[i].predict_proba(test_vector))
+               #print productHelp
+            i += 1
+            j += 1
+            #print i, j 
+            
+        
+        product *= power(productHelp, (1./k))     
+        print ' i = ', i , product     
+    return product
 def mp(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data):
+    #avaerage from the product and sum
     '''Average of Mean and Prduct  '''
     mean = getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data)
-   
+    print 'mean', mean
+
     product= getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data)
-   
-    return (mean + product)/2
+    print  'product',product
+    #print ((mean + product)/2)
+    return ((mean + product)/2)
 def predict_class( n_max_feature_number, m_subspace_width, trainingset, test_text, text_encoding,  mode = exhaustiv_disjoint_subspacing ):
     # use k_randome_classifier or exhaustiv_disjoint_subspacing for mode  exhaustiv_disjoint_subspacing
     #works only for one text at the time
@@ -196,69 +222,90 @@ def perdict_with_trainset( n_max_feature_number, m_subspace_width, classifier_se
     predict_result = mp(n_max_feature_number, m_subspace_width, classifier_set, test_text)
     print predict_result
     return trainingset.target_names[argmax(predict_result)]
-####################Settings##################
-n = 1000
-m = 2
-encoding_setting = 'ISO 8859-7'#'utf-8'
+def getBunchOutRawTrain(texts, text_authors, authorNames):
+    return Bunch( data= texts, target= text_authors, target_names= authorNames, DESCR=None)
+def getBunchOutTest( test_text, file_names):
+    return Bunch(data= test_text, file_names= file_names, DESCR=None)
 
-categories = None
-##############################################
+def getProbabilities(ergebnis, resultMatrix ):
+    probList =[]
+    for i in range(len(ergebnis)):
+        probList.append(resultMatrix[i][ergebnis[i]])
+    return probList
 
-
-############# Loading Files ###################
-# Load files in the follwing structur
-# with categories you can select certain subfolders to load if none everything will included
-# textfilenames are not relevant
-#        /folder
-#           /autor1
-#                text1.txt text2.txt ....
-#           /autor2
-#                text1.txt text2.txt ....
-#    for mac osX :
-#     the folder must without .DS_store
-#     for mac use this command in terminal 
-#        find . -name '*.DS_Store' -type f -delete
-
-#trainSet = load_files('Vima-Authors/vima GB/training corpus' )
-#testSet = load_files('Vima-Authors/vima GB/test corpus', categories=None )
-trainSet = load_files('NEW CORPORA/C10', categories= ['candidate00001', 'candidate00002', 'candidate00003', 'candidate00004', 'candidate00005', 'candidate00006', 'candidate00007', 'candidate00008', 'candidate00009', 'candidate00010']  )
-testSet = load_files('NEW CORPORA/C10', categories=['unknown'] )
-# train Classifier
-classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n , m, encoding_setting)
-
-
-
-print '#########'
-
-
-product = mp(n, m, classifier_set, testSet.data)
-
-print ' normal',product
-
-ergebnis = argmax(product ,1)
-score =0
-f=0
-while f < len(ergebnis):
-    if (ergebnis[f] == testSet.target[f]):
-        score +=1
-    else: 
-        print testSet.target_names[ergebnis[f]] , testSet.target_names[testSet.target[f]]
-    print 'f', f+1, 'score', score
-    f +=1
-
-percent = (float(score)/(f))*100
-
-print ' percentage' , percent
-
-print 'erg' ,ergebnis
-print 'target ' , testSet.target
-#print 'author 3 ', testSet.target_names[3]
-### percentage #### 
-
-'''
-    print " vectorizer" 
-    helper= classifier_set.vectorizer[t].transform(test_set)
-    print helper
+def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ):
     
-'''
+    jsonhandler.loadJson(corpusdir)
+    jsonhandler.loadTraining()
+    
+    authors = jsonhandler.candidates
+    tests = jsonhandler.unknowns
+    
+    encoding_setting= jsonhandler.encoding
+    
+    global trainSet,testSet
+    texts = []
+    text_authors =[]
+    test_texts=[]
+    ergebnisList=[]
+    prob_list=[]
+    for i in range(len(authors)):
+        author = authors[i]
+        for text in jsonhandler.trainings[author]:
+            texts.append(jsonhandler.getTrainingText(author, text))
+            text_authors.append(i)
+   
+    
+    trainSet = getBunchOutRawTrain(texts, text_authors, authors)
+    classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n_max_feature_number, m_subspace_width, encoding_setting)
+    for t_text in tests: 
+        #run classifier for every test text 
+        test_texts.append(jsonhandler.getUnknownText(t_text))
+        
+         # list with most probabil authors 
+        
+        #ergebnisList.append(ergebnis[0])
+         
+    proMatrx= mp(n_max_feature_number, m_subspace_width, classifier_set, test_texts)
+    
+    ergebnis = argmax(proMatrx, 1 ) 
+      
+
+    
+    
+    
+    
+    #print 'ergebnis ', ergebnis
+    
+    result_author_list= []
+    for i in range(len(ergebnis)):
+        result_author_list.append(authors[ergebnis[i]])
+        prob_list.append(proMatrx[i][ergebnis[i]])
+    #print result_author_list
+    #print ' probList',prob_list 
+    
+    jsonhandler.storeJson(outputdir,tests, result_author_list, prob_list)
+
+#_____________READ ARGS______________
+
+if (len(sys.argv )<3):
+    logging.warning('MAaaaaaaN please youse more Arguments, atleast a path to a dataset and a path for the output')
+    exit()
+
+elif (len(sys.argv)==3):
+    inputdir= sys.argv[1]
+    outputdir= sys.argv[2]
+    main(inputdir, outputdir)
+    
+elif (len(sys.argv)==5):
+    inputdir= sys.argv[1]
+    outputdir= sys.argv[2]
+    n= int(sys.argv[3])
+    print n
+    m= int(sys.argv[4])
+    print m
+    main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m)
+else:
+    logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
+    exit()
 
