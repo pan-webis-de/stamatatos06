@@ -81,7 +81,7 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
 
     #return a struct with the lists
     return Bunch( classifier= classifierList, vectorizer= vectorizerList) ;
-def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd'):
+def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd', myShrinkager=None):
     ''' Select m randomly chosen features from the data set and erase them from it. so you use ever feature only once
     '''
     ########## create feature list
@@ -130,7 +130,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LinearDiscriminantAnalysis(solver=mySolver, shrinkage='auto').fit( X_train_tfidf.toarray(), trainSet.target )
+        clf = LinearDiscriminantAnalysis(solver=mySolver, shrinkage=myShrinkager).fit( X_train_tfidf.toarray(), trainSet.target )
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -231,7 +231,7 @@ def getProbabilities(ergebnis, resultMatrix ):
         probList.append(resultMatrix[i][ergebnis[i]])
     return probList
 
-def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,mySolver='svd'):
+def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,mySolver='svd', shrinkage=None):
     
     jsonhandler.loadJson(corpusdir)
     jsonhandler.loadTraining()
@@ -255,7 +255,7 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,myS
    
     
     trainSet = getBunchOutRawTrain(texts, text_authors, authors)
-    classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n_max_feature_number, m_subspace_width, encoding_setting, mySolver)
+    classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n_max_feature_number, m_subspace_width, encoding_setting, mySolver,shrinkage)
     for t_text in tests: 
         #run classifier for every test text 
         test_texts.append(jsonhandler.getUnknownText(t_text))
@@ -274,7 +274,7 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,myS
 
 
 #lda -> Lineardiscriminant analysis 
-#main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2)
+#main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2, 'eigen', 'auto')
 if (len(sys.argv )<3):
     logging.warning('MAaaaaaaN please youse more Arguments, atleast a path to a dataset and a path for the output')
     exit()
@@ -290,6 +290,24 @@ elif (len(sys.argv)==5):
     n= int(sys.argv[3])
     m= int(sys.argv[4])
     main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m)
+    
+elif (len(sys.argv)==6):
+    inputdir= sys.argv[1]
+    outputdir= sys.argv[2]
+    n= int(sys.argv[3])
+    m= int(sys.argv[4])
+    mysolver =sys.argv[5]
+    main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m , mySolver=mysolver)
+
+elif (len(sys.argv)==7):
+    inputdir= sys.argv[1]
+    outputdir= sys.argv[2]
+    n= int(sys.argv[3])
+    m= int(sys.argv[4])
+    mysolver =sys.argv[5]
+    shriker =sys.argv[6]
+    main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m , mySolver=mysolver, shrinkage=shriker)    
+
 else:
     logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
     exit()
