@@ -1,8 +1,8 @@
 
-from sklearn.datasets import load_files
+
 from sklearn.feature_extraction.text import CountVectorizer
 from numpy.random import randint
-from sklearn.lda import LDA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.feature_extraction.text import TfidfTransformer
 from numpy import power, float64
 from numpy import argmax
@@ -10,6 +10,8 @@ from numpy import ndarray
 import jsonhandler
 import sys
 import logging
+from sklearn.feature_extraction.text import CountVectorizer
+import sklearn
 
 '''
 this script implements the methods of E. Stamatatos' paper 'AUTORSHIP ATTRIBUTION ON FEATURE SET SUBSPACING ENSEMBLES'
@@ -30,7 +32,7 @@ class Bunch(dict):
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
         self.__dict__ = self
-def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text_encoding):
+def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd'):
     ''' Select m randomly chosen features from the data set and transfrom dem into a Classifier
     so you get N/M =k diffrent classifie
     '''
@@ -72,14 +74,14 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
         #normize it
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
         #train the Classifier with the normed vector set
-        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target)
+        clf = LinearDiscriminantAnalysis(solver=mySolver).fit( X_train_tfidf.toarray(), trainSet.target)
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
         vectorizerList.append(singel_count_vectorizer)
 
     #return a struct with the lists
     return Bunch( classifier= classifierList, vectorizer= vectorizerList) ;
-def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_width , text_encoding):
+def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd'):
     ''' Select m randomly chosen features from the data set and erase them from it. so you use ever feature only once
     '''
     ########## create feature list
@@ -128,7 +130,7 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
         #train the Classifier with the normed vector set
-        clf = LDA(solver='svd').fit( X_train_tfidf.toarray(), trainSet.target )
+        clf = LinearDiscriminantAnalysis(solver=mySolver, shrinkage='auto').fit( X_train_tfidf.toarray(), trainSet.target )
         
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -229,7 +231,7 @@ def getProbabilities(ergebnis, resultMatrix ):
         probList.append(resultMatrix[i][ergebnis[i]])
     return probList
 
-def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ):
+def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,mySolver='svd'):
     
     jsonhandler.loadJson(corpusdir)
     jsonhandler.loadTraining()
@@ -253,7 +255,7 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ):
    
     
     trainSet = getBunchOutRawTrain(texts, text_authors, authors)
-    classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n_max_feature_number, m_subspace_width, encoding_setting)
+    classifier_set = exhaustiv_disjoint_subspacing(trainSet,  n_max_feature_number, m_subspace_width, encoding_setting, mySolver)
     for t_text in tests: 
         #run classifier for every test text 
         test_texts.append(jsonhandler.getUnknownText(t_text))
@@ -269,7 +271,10 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ):
     jsonhandler.storeJson(outputdir,tests, result_author_list, prob_list)
 
 #_____________READ ARGS______________
-
+print sklearn.__version__
+#TODO testing the new version 
+#lda -> Lineardiscriminant analysis 
+main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2)
 if (len(sys.argv )<3):
     logging.warning('MAaaaaaaN please youse more Arguments, atleast a path to a dataset and a path for the output')
     exit()
@@ -289,3 +294,4 @@ else:
     logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
     exit()
 
+main('/NEW CORPORA/C10', '/NEW CORPORA/C10',2,2)
