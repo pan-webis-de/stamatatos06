@@ -271,10 +271,10 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,myS
     jsonhandler.storeJson(outputdir,tests, result_author_list, prob_list)
 
 #_____________READ ARGS______________
-print sklearn.__version__
-#TODO testing the new version 
+
+
 #lda -> Lineardiscriminant analysis 
-main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2)
+#main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2)
 if (len(sys.argv )<3):
     logging.warning('MAaaaaaaN please youse more Arguments, atleast a path to a dataset and a path for the output')
     exit()
@@ -294,4 +294,3 @@ else:
     logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
     exit()
 
-main('/NEW CORPORA/C10', '/NEW CORPORA/C10',2,2)
