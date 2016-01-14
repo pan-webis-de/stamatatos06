@@ -1,4 +1,4 @@
-# stamatatos06 - An Approach to Authorship Attribution
+## stamatatos06 - An Approach to Authorship Attribution
 
 This is a reimplmentation of the approach to authorship attribution originally described in
 
@@ -14,7 +14,7 @@ If you use this reimplementation in your own research, please make sure to cite 
 
 To execute the software, install it and make sure all its dependencies are installed as well; then run the software using the following command:
 
-`python stamatatos06_Subspacing_main.py PATH_TO_INPUT_DATA OUTPUT_PATH`
+`python stamatatos06_Subspacing_main.py <path-to-input-data> <output-path>`
 
 ## Input and Output Formats
 
