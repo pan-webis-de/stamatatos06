@@ -2,7 +2,7 @@
 
 This is a reimplementation of the approach to authorship attribution originally described in
 
-> E. Stamatatos. [Authorship attribution based on feature set subspacing ensembles](http://www.icsd.aegean.gr/lecturers/Stamatatos/papers/ijait-2006.pdf). Int. Journal on Artificial Intelligence Tools, 15(5), pp. 823-838, 2006 [[paper](http://www.icsd.aegean.gr/lecturers/Stamatatos/papers/ijait-2006.pdf)]
+> Efstathios Stamatatos. [Authorship attribution based on feature set subspacing ensembles](http://www.icsd.aegean.gr/lecturers/Stamatatos/papers/ijait-2006.pdf). Int. Journal on Artificial Intelligence Tools, 15(5), pp. 823-838, 2006 [[paper](http://www.icsd.aegean.gr/lecturers/Stamatatos/papers/ijait-2006.pdf)]
 
 It was reimplemented as part of a science reproducibility study alongside [14 other authorship attribution approaches](https://github.com/search?q="Who+wrote+the+web"+user:pan-webis-de). The results of the reproducibility study can be found in
 
