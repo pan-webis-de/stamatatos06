@@ -13,22 +13,28 @@
 
 '''
 EXAMPLE:
+
 import jsonhandler
+
 candidates = jsonhandler.candidates
 unknowns = jsonhandler.unknowns
 jsonhandler.loadJson("testcorpus")
+
 # If you want to do training:
 jsonhandler.loadTraining()
 for cand in candidates:
 	for file in jsonhandler.trainings[cand]:
 		# Get content of training file 'file' of candidate 'cand' as a string with:
 		# jsonhandler.getTrainingText(cand, file)
+
 # Create lists for your answers (and scores)
 authors = []
 scores = []
+
 # Get Parameters from json-file:
 l = jsonhandler.language
 e = jsonhandler.encoding
+
 for file in unknowns:
 	# Get content of unknown file 'file' as a string with:
 	# jsonhandler.getUnknownText(file)
@@ -37,8 +43,10 @@ for file in unknowns:
 	score = 0.5
 	authors.append(author)
 	scores.append(score)
+
 # Save results to json-file out.json (passing 'scores' is optional)
 jsonhandler.storeJson(unknowns, authors, scores)
+
 # If you want to evaluate the ground-truth file
 loadGroundTruth()
 # find out true author of document unknowns[i]:
@@ -47,6 +55,7 @@ loadGroundTruth()
 
 import os
 import json
+import codecs
 
 META_FNAME = "meta-file.json"
 OUT_FNAME = "answers.json"
@@ -85,7 +94,7 @@ def loadTraining():
 
 
 def getTrainingText(cand, fname):
-    dfile = open(os.path.join(corpusdir, cand, fname))
+    dfile = codecs.open(os.path.join(corpusdir, cand, fname), "r", "utf-8")
     s = dfile.read()
     dfile.close()
     return s
@@ -103,7 +112,7 @@ def getTrainingBytes(cand, fname):
 
 
 def getUnknownText(fname):
-    dfile = open(os.path.join(upath, fname))
+    dfile = codecs.open(os.path.join(upath, fname), "r", "utf-8")
     s = dfile.read()
     dfile.close()
     return s
