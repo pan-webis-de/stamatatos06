@@ -14,14 +14,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 import sklearn
 
 '''
-this script implements the methods of E. Stamatatos' paper 'AUTORSHIP ATTRIBUTION ON FEATURE SET SUBSPACING ENSEMBLES'
+this script implements the approach of E. Stamatatos' paper 'AUTORSHIP ATTRIBUTION ON FEATURE SET SUBSPACING ENSEMBLES'
 
-to use the discriped lerning algorithems I helped me with the scikit Lern libray
+to use the discribed learning algorithms, I employed the scikit learn libray
 
-So to run this script you need numpy and sklern
+so to run this script you need numpy and sklearn
 
-
-this script is written by Timo Sommer
+this script was written by Timo Sommer
 
 '''
 
@@ -33,18 +32,18 @@ class Bunch(dict):
         dict.__init__(self, kwargs)
         self.__dict__ = self
 def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd'):
-    ''' Select m randomly chosen features from the data set and transfrom dem into a Classifier
-    so you get N/M =k diffrent classifie
+    ''' Select m randomly chosen features from the data set and transfrom them into a classifier
+    so you get N/M=k different classifiers
     '''
     ### make subspaces
 
     count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding )
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
-    #when less features in the Feature list then max_feature raise Valueerror
+    #when less features in the feature list then max_feature raises Valueerror
     if len(wordlist)< n_max_feature_number:
-        raise ValueError('there a not enough features in the trainingset. Please be smart and try somthing else ')
-    #list for passing the objects
+        raise ValueError('there are not enough features in the training set.')
+    #lists for passing the objects
     classifierList=[]
     vectorizerList =[]
 
@@ -69,11 +68,11 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
 
         #train the vectorizer on the new subspace
         singel_count_vectorizer= CountVectorizer( max_features=m_subspace_width , encoding=text_encoding, vocabulary=wordSubspace).fit(wordSubspace)
-        #build the vectors from the dataset with the traind vectroizer
+        #build the vectors from the dataset with the trained vectroizer
         vectored_data = singel_count_vectorizer.transform(dataset.data)
-        #normize it
+        #normalize it
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
-        #train the Classifier with the normed vector set
+        #train the classifier with the normalized vector set
         clf = LinearDiscriminantAnalysis(solver=mySolver).fit( X_train_tfidf.toarray(), trainSet.target)
         #add the classifier an the vectorizer to the list
         classifierList.append(clf)
@@ -82,22 +81,22 @@ def k_randome_classifier(dataset,  n_max_feature_number, m_subspace_width , text
     #return a struct with the lists
     return Bunch( classifier= classifierList, vectorizer= vectorizerList) ;
 def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_width , text_encoding, mySolver='svd', myShrinkager=None):
-    ''' Select m randomly chosen features from the data set and erase them from it. so you use ever feature only once
+    ''' Select m randomly chosen features from the data set and erase them from it. every feature is used only once
     '''
-    ########## create feature list
+    # create feature list
     count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding )#,token_pattern= '(?u)\\b\\w+\\b'
     count_vectorizer.fit(dataset.data)
     wordlist = count_vectorizer.get_feature_names()
-    #when less features in the Feature list then max_feature raise Valueerror
+    #when less features in the feature list then max_feature raise Valueerror
     if (len(wordlist) < n_max_feature_number):
-        raise ValueError('there a not enough features in the trainingset. Please be smart and try somthing else ')
+        raise ValueError('there are not enough features in the training set.')
 
     #list for passing the objects
     classifierList=[]
     vectorizerList =[]
     
     used_features = []
-    #nomilizer for the featuresets
+    #nomalizer for the feature sets
     singel_count_vectorizer = CountVectorizer( max_features=m_subspace_width , encoding=text_encoding)
       
     tfid_transformer= TfidfTransformer( use_idf=False)
@@ -106,13 +105,13 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
         k = k+1
         #get new vectorizer trained on the features in the special subspace
         #singel_count_vectorizer = CountVectorizer( max_features=n_max_feature_number , encoding=text_encoding)
-        wordSubspace =[] #wordSubspace is a list with the words for the new clasifier
+        wordSubspace =[] #wordSubspace is a list with the words for the new classifier
         i = 0 # iterator
         while i < m_subspace_width:
             i=i+1
 
             a_random_int = randint(n_max_feature_number)
-            ## until the Randome numer is no in list anymore
+            # until the Random number is not in list anymore
             while a_random_int in used_features:
                 a_random_int = randint(n_max_feature_number)
             #add to list
@@ -122,17 +121,17 @@ def exhaustiv_disjoint_subspacing(dataset,  n_max_feature_number, m_subspace_wid
 
         #train the vectorizer on the new subspace
         singel_count_vectorizer= CountVectorizer( max_features=m_subspace_width , encoding=text_encoding, vocabulary=wordSubspace).fit(wordSubspace)
-        #build the vectors from the dataset with the traind vectroizer
+        #build the vectors from the dataset with the trained vectroizer
         vectored_data = singel_count_vectorizer.transform(dataset.data)
     
         
-        #normize it
+        #normalize it
         X_train_tfidf =tfid_transformer.fit_transform(vectored_data)
 
-        #train the Classifier with the normed vector set
+        #train the classifier with the normalized vector set
         clf = LinearDiscriminantAnalysis(solver=mySolver, shrinkage=myShrinkager).fit( X_train_tfidf.toarray(), trainSet.target )
         
-        #add the classifier an the vectorizer to the list
+        #add the classifier and the vectorizer to the list
         classifierList.append(clf)
         vectorizerList.append(singel_count_vectorizer)
         #return a struct with the lists
@@ -157,7 +156,7 @@ def getting_mean(n_max_feature_number, m_subspace_width, classifier_bunch, testS
 
 def getting_product(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data):
     '''
-    getting the mean of the posterior probailities see formula 3 in the paper
+    getting the mean of the posterior probabilities (see formula 3 in the paper)
     '''
    
     k= int (n_max_feature_number/m_subspace_width)
@@ -210,14 +209,14 @@ def mp(n_max_feature_number, m_subspace_width, classifier_bunch, testSet_data):
     
     return ((mean + product)/2)
 def predict_class( n_max_feature_number, m_subspace_width, trainingset, test_text, text_encoding,  mode = exhaustiv_disjoint_subspacing ):
-    # use k_randome_classifier or exhaustiv_disjoint_subspacing for mode  exhaustiv_disjoint_subspacing
-    #works only for one text at the time
+    # use k_random_classifier or exhaustiv_disjoint_subspacing for mode exhaustiv_disjoint_subspacing
+    #works only for one text at a time
     classifier_set = mode(trainingset,  n_max_feature_number , m_subspace_width, text_encoding)
     predict_result = mp(n_max_feature_number, m_subspace_width, classifier_set, test_text)
     return trainingset.target_names[argmax(predict_result)]
 def perdict_with_trainset( n_max_feature_number, m_subspace_width, classifier_set,trainingset, test_text, text_encoding ):
-    #use k_randome_classifier or exhaustiv_disjoint_subspacing for mode  exhaustiv_disjoint_subspacing
-    #works only for one text at the time
+    #use k_random_classifier or exhaustiv_disjoint_subspacing for mode exhaustiv_disjoint_subspacing
+    #works only for one text at a time
     predict_result = mp(n_max_feature_number, m_subspace_width, classifier_set, test_text)
     return trainingset.target_names[argmax(predict_result)]
 def getBunchOutRawTrain(texts, text_authors, authorNames):
@@ -276,7 +275,7 @@ def main(corpusdir, outputdir, n_max_feature_number=1000,m_subspace_width=2 ,myS
 #lda -> Lineardiscriminant analysis 
 #main('./NEW CORPORA/C10','./NEW CORPORA/C10',2,2, 'eigen', 'auto')
 if (len(sys.argv )<3):
-    logging.warning('MAaaaaaaN please youse more Arguments, atleast a path to a dataset and a path for the output')
+    logging.warning('insufficient arguments: at least <input-directory> and <outut-directory> are required')
     exit()
 
 elif (len(sys.argv)==3):
@@ -309,6 +308,6 @@ elif (len(sys.argv)==7):
     main(inputdir, outputdir,n_max_feature_number=n, m_subspace_width=m , mySolver=mysolver, shrinkage=shriker)    
 
 else:
-    logging.warning('use the rigth number of Arguments, 1st dataset, 2nd output, 3rd n, 4th m')
+    logging.warning('too many arguments')
     exit()
 
